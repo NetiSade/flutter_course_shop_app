@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import './product.dart';
+import 'package:http/http.dart' as http;
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -49,8 +51,43 @@ class Products with ChangeNotifier {
     return _items.where((i) => i.isFavorite).toList();
   }
 
-  void addProduct() {
-    //_items.add(value);
+  Future<void> addProduct(Product product) {
+    const url = 'https://flutter-shop-app-d5a6e.firebaseio.com/products.json';
+
+    return http
+        .post(url,
+            body: json.encode({
+              'isFavorite': product.isFavorite,
+              'price': product.price,
+              'title': product.title,
+              'description': product.description,
+              'imageUrl': product.imageUrl
+            }))
+        .then((response) {
+      print(json.decode(response.body));
+      final newProduct = Product(
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        id: json.decode(response.body)['name'],
+      );
+
+      _items.add(newProduct);
+      notifyListeners();
+    });
+  }
+
+  void updateProduct(String id, Product product) {
+    final prodIndex = _items.indexWhere((element) => element.id == id);
+    if (prodIndex >= 0) {
+      _items[prodIndex] = product;
+      notifyListeners();
+    }
+  }
+
+  void deleteProduct(String id) {
+    _items.removeWhere((item) => item.id == id);
     notifyListeners();
   }
 }
