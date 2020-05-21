@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
+import '../models/http_exception.dart';
+import 'package:http/http.dart' as http;
+import '../constants.dart' as Constants;
 
 class Product with ChangeNotifier {
   String id;
@@ -16,8 +21,26 @@ class Product with ChangeNotifier {
       this.imageUrl,
       this.isFavorite = false});
 
-  void toggleFavoriteState() {
+  void _setFavVal(bool val) {
     isFavorite = !isFavorite;
     notifyListeners();
+  }
+
+  void toggleFavoriteState() async {
+    final url = Constants.ProductsUrl + '/$id.json';
+    _setFavVal(!isFavorite);
+
+    try {
+      var res = await http.patch(
+        url,
+        body: json.encode({'isFavorite': isFavorite}),
+      );
+      if (res.statusCode >= 400) {
+        throw HttpExeption('Failed http patch error code: ${res.statusCode}');
+      }
+    } catch (e) {
+      print(e);
+      _setFavVal(!isFavorite);
+    }
   }
 }

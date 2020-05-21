@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../models/http_exception.dart';
 import './product.dart';
 import 'package:http/http.dart' as http;
+import '../constants.dart' as Constants;
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -40,8 +41,6 @@ class Products with ChangeNotifier {
     // ),
   ];
 
-  final _productsUrl = 'https://flutter-shop-app-d5a6e.firebaseio.com/products';
-
   List<Product> get items {
     return [..._items];
   }
@@ -56,9 +55,13 @@ class Products with ChangeNotifier {
 
   Future<void> fetchAndSetProducts() async {
     try {
-      final response = await http.get(_productsUrl + '.json');
+      final response = await http.get(Constants.ProductsUrl + '.json');
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadedProducts = [];
+
+      if (extractedData == null) {
+        return;
+      }
 
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
@@ -80,7 +83,7 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product product) async {
     try {
-      final response = await http.post(_productsUrl + '.json',
+      final response = await http.post(Constants.ProductsUrl + '.json',
           body: json.encode({
             'isFavorite': product.isFavorite,
             'price': product.price,
@@ -108,7 +111,7 @@ class Products with ChangeNotifier {
   Future<void> updateProduct(String id, Product product) async {
     final prodIndex = _items.indexWhere((element) => element.id == id);
     if (prodIndex >= 0) {
-      final url = _productsUrl + '/$id.json';
+      final url = Constants.ProductsUrl + '/$id.json';
       await http.patch(url,
           body: json.encode({
             'price': product.price,
@@ -122,7 +125,7 @@ class Products with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    final url = _productsUrl + '/$id.json';
+    final url = Constants.ProductsUrl + '/$id.json';
     final existingProductIndex = _items.indexWhere((item) => item.id == id);
     var existingProduct = _items[existingProductIndex];
     _items.removeAt(existingProductIndex);
