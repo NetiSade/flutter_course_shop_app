@@ -83,7 +83,7 @@ class Orders with ChangeNotifier {
         );
       });
     } catch (e) {}
-    _orders = loadedItems.reversed;
+    _orders = loadedItems.reversed.toList();
     notifyListeners();
   }
 }

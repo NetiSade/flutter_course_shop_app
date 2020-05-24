@@ -77,7 +77,7 @@ class Products with ChangeNotifier {
       notifyListeners();
     } catch (error) {
       print(error);
-      throw (error);
+      //throw (error);
     }
   }
 
