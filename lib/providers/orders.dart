@@ -23,6 +23,14 @@ class OrderItem {
 class Orders with ChangeNotifier {
   List<OrderItem> _orders = [];
 
+  final String authToken;
+  final String userId;
+  String url;
+
+  Orders(this.authToken, this.userId, this._orders) {
+    url = Constants.OrdersUrl + '/$userId.json?auth=$authToken';
+  }
+
   List<OrderItem> get orders {
     return [..._orders];
   }
@@ -31,7 +39,7 @@ class Orders with ChangeNotifier {
     var dateTime = DateTime.now();
 
     try {
-      final res = await http.post(Constants.OrdersUrl + '.json',
+      final res = await http.post(url,
           body: json.encode({
             'amount': total,
             'dateTime': dateTime.toIso8601String(),
@@ -62,7 +70,7 @@ class Orders with ChangeNotifier {
   Future<void> fetchAndSetOrders() async {
     final List<OrderItem> loadedItems = [];
     try {
-      final res = await http.get(Constants.OrdersUrl + '.json');
+      final res = await http.get(url);
       final extractedData = json.decode(res.body) as Map<String, dynamic>;
       if (extractedData == null) {
         return;

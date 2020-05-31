@@ -26,14 +26,14 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleFavoriteState() async {
-    final url = Constants.ProductsUrl + '/$id.json';
+  void toggleFavoriteState(String token, String userId) async {
+    final url = Constants.UserFavoritesUrl + '/$userId/$id.json?auth=$token';
     _setFavVal(!isFavorite);
 
     try {
-      var res = await http.patch(
+      var res = await http.put(
         url,
-        body: json.encode({'isFavorite': isFavorite}),
+        body: json.encode(isFavorite),
       );
       if (res.statusCode >= 400) {
         throw HttpExeption('Failed http patch error code: ${res.statusCode}');
